@@ -15,7 +15,9 @@ This project focuses on **robust 3D point cloud registration**, especially under
 
 ## 📦 Environment Setup
 
-follow the repo https://github.com/qinzheng93/GeoTransformer
+Follow the repo https://github.com/qinzheng93/GeoTransformer and the repo https://github.com/microsoft/unilm/tree/master/Diff-Transformer.
+
+All required dependencies are listed in `list.md` for reference.
 
 ```bash
 # It is recommended to create a new environment
@@ -91,20 +93,20 @@ CUDA_VISIBLE_DEVICES=0 python trainval.py
 
 ### 3DMatch/3DLoMatch
 ```bash
-conda activate geotransformer
-cd experiments/geo.3dmatch.scdc2.SiLU.maskatten.warmup.loss
-# 3DMatch
-CUDA_VISIBLE_DEVICES=0 ./eval.sh EPOCH 3DMatch
+# 3DMatch,因为是要用自己训出来的权重来测试所以--snapshot参数需要改成对应权重的路径，下面仅为示范
+CUDA_VISIBLE_DEVICES=0 python test.py --snapshot=../../output/geo.3dmatch.scdc2.SiLU.maskatten.warmup.loss/snapshots/epoch-39.pth.tar --benchmark=3DMatch
+CUDA_VISIBLE_DEVICES=0 eval.py --test_epoch=39 --benchmark=3DMatch --method=lgr
 # 3DLoMatch
-CUDA_VISIBLE_DEVICES=0 ./eval.sh EPOCH 3DLoMatch
+CUDA_VISIBLE_DEVICES=0 python test.py --snapshot=../../output/geo.3dmatch.scdc2.SiLU.maskatten.warmup.loss/snapshots/epoch-39.pth.tar --benchmark=3DLoMatch
+CUDA_VISIBLE_DEVICES=0 eval.py --test_epoch=39 --benchmark=3DLoMatch --method=lgr
 ```
 EPOCH is the epoch id.
 
 ### Modelnet
 ```bash
-conda activate geotransformer
-cd experiments/geo.modelnet.selfcrossdiffcross2.SiLU.maskatten.warmup
 CUDA_VISIBLE_DEVICES=0 python test.py --test_iter=ITER
+eg. CUDA_VISIBLE_DEVICES=0 test.py --test_iter=400000
+    CUDA_VISIBLE_DEVICES=0 test.py --test_iter=390000
 ```
 ITER is the iteration id.
 
