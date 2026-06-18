@@ -28,6 +28,7 @@ class SingleTester(BaseTester):
         pass
 
     def after_test_step(self, iteration, data_dict, output_dict, result_dict):
+    
         pass
 
     def after_test_epoch(self):

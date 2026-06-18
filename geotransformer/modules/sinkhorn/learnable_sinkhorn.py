@@ -39,7 +39,11 @@ class LearnableLogOptimalTransport(nn.Module):
         padded_row_masks[:, :num_row] = ~row_masks
         padded_col_masks = torch.zeros(size=(batch_size, num_col + 1), dtype=torch.bool).cuda()
         padded_col_masks[:, :num_col] = ~col_masks
-        padded_score_masks = torch.logical_or(padded_row_masks.unsqueeze(2), padded_col_masks.unsqueeze(1))
+        # 针对高版本torch的改动
+        padded_score_masks = torch.logical_or(
+            padded_row_masks.unsqueeze(2).expand(-1, -1, padded_col_masks.shape[1]), 
+            padded_col_masks.unsqueeze(1).expand(-1, padded_row_masks.shape[1], -1)
+        )
 
         padded_col = self.alpha.expand(batch_size, num_row, 1)
         padded_row = self.alpha.expand(batch_size, 1, num_col + 1)

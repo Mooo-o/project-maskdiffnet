@@ -47,6 +47,14 @@ class MultiHeadAttention(nn.Module):
             attention_scores: intermediate values
                 'attention_scores': torch.Tensor (B, H, N, M), attention scores before dropout
         """
+        '''if q.dim() == 4:
+            q = rearrange(input_q, 'b n h c -> b n (h c)')
+            k = rearrange(input_k, 'b m h c -> b m (h c)')
+            v = rearrange(input_v, 'b m h c -> b m (h c)')
+            q = rearrange(self.proj_q(q), 'b n (h c) -> b h n c', h=self.num_heads)
+            k = rearrange(self.proj_k(k), 'b m (h c) -> b h m c', h=self.num_heads)
+            v = rearrange(self.proj_v(v), 'b m (h c) -> b h m c', h=self.num_heads)
+        else:'''
         q = rearrange(self.proj_q(input_q), 'b n (h c) -> b h n c', h=self.num_heads)
         k = rearrange(self.proj_k(input_k), 'b m (h c) -> b h m c', h=self.num_heads)
         v = rearrange(self.proj_v(input_v), 'b m (h c) -> b h m c', h=self.num_heads)
@@ -80,17 +88,18 @@ class AttentionLayer(nn.Module):
 
     def forward(
         self,
-        input_states,
-        memory_states,
+        input_states_q,
+        memory_states_k,
+        memory_states_v,
         memory_weights=None,
         memory_masks=None,
         attention_factors=None,
         attention_masks=None,
     ):
         hidden_states, attention_scores = self.attention(
-            input_states,
-            memory_states,
-            memory_states,
+            input_states_q,
+            memory_states_k,
+            memory_states_v,
             key_weights=memory_weights,
             key_masks=memory_masks,
             attention_factors=attention_factors,
@@ -98,7 +107,7 @@ class AttentionLayer(nn.Module):
         )
         hidden_states = self.linear(hidden_states)
         hidden_states = self.dropout(hidden_states)
-        output_states = self.norm(hidden_states + input_states)
+        output_states = self.norm(hidden_states + input_states_q)
         return output_states, attention_scores
 
 
@@ -110,16 +119,18 @@ class TransformerLayer(nn.Module):
 
     def forward(
         self,
-        input_states,
-        memory_states,
+        input_states_q,
+        memory_states_k,
+        memory_states_v,
         memory_weights=None,
         memory_masks=None,
         attention_factors=None,
         attention_masks=None,
     ):
         hidden_states, attention_scores = self.attention(
-            input_states,
-            memory_states,
+            input_states_q,
+            memory_states_k,
+            memory_states_v,
             memory_weights=memory_weights,
             memory_masks=memory_masks,
             attention_factors=attention_factors,

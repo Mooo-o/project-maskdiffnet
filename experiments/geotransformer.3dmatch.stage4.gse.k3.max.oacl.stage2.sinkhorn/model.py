@@ -22,6 +22,7 @@ class GeoTransformer(nn.Module):
         self.num_points_in_patch = cfg.model.num_points_in_patch
         self.matching_radius = cfg.model.ground_truth_matching_radius
 
+        # 主干网加载
         self.backbone = KPConvFPN(
             cfg.backbone.input_dim,
             cfg.backbone.output_dim,
@@ -32,6 +33,7 @@ class GeoTransformer(nn.Module):
             cfg.backbone.group_norm,
         )
 
+        # 几何transformer加载
         self.transformer = GeometricTransformer(
             cfg.geotransformer.input_dim,
             cfg.geotransformer.output_dim,
@@ -44,10 +46,12 @@ class GeoTransformer(nn.Module):
             reduction_a=cfg.geotransformer.reduction_a,
         )
 
+        # 选择超点中，重叠度大于一定值的一定数量的点对，然后返回它们的索引
         self.coarse_target = SuperPointTargetGenerator(
             cfg.coarse_matching.num_targets, cfg.coarse_matching.overlap_threshold
         )
 
+        # 计算特征之间的相似度，选择高匹配分数的点对
         self.coarse_matching = SuperPointMatching(
             cfg.coarse_matching.num_correspondences, cfg.coarse_matching.dual_normalization
         )

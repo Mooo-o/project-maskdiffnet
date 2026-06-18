@@ -111,11 +111,13 @@ _C.geotransformer.input_dim = 512
 _C.geotransformer.hidden_dim = 256
 _C.geotransformer.output_dim = 256
 _C.geotransformer.num_heads = 4
-_C.geotransformer.blocks = ["self", "cross", "self", "cross", "self", "cross"]
+_C.geotransformer.blocks = ['diff', "self", "cross", "self", "cross", "self", "cross"]
 _C.geotransformer.sigma_d = 0.2
 _C.geotransformer.sigma_a = 15
 _C.geotransformer.angle_k = 3
 _C.geotransformer.reduction_a = "max"
+_C.geotransformer.embed_dim = 256
+_C.geotransformer.depth = 3
 
 # model - Fine Matching
 _C.fine_matching = edict()

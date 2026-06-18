@@ -48,8 +48,13 @@ class LocalGlobalRegistration(nn.Module):
 
     def compute_correspondence_matrix(self, score_mat, ref_knn_masks, src_knn_masks):
         r"""Compute matching matrix and score matrix for each patch correspondence."""
-        mask_mat = torch.logical_and(ref_knn_masks.unsqueeze(2), src_knn_masks.unsqueeze(1))
-
+        # mask_mat = torch.logical_and(ref_knn_masks.unsqueeze(2), src_knn_masks.unsqueeze(1))
+        # 改动
+        mask_mat = torch.logical_and(
+            ref_knn_masks.unsqueeze(2).expand(-1, -1, src_knn_masks.shape[1]),
+            src_knn_masks.unsqueeze(1).expand(-1, ref_knn_masks.shape[1], -1)
+        )
+        
         batch_size, ref_length, src_length = score_mat.shape
         batch_indices = torch.arange(batch_size).cuda()
 

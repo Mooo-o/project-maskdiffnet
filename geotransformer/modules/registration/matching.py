@@ -274,7 +274,15 @@ def get_node_correspondences(
     if src_knn_masks is None:
         src_knn_masks = torch.ones(size=(src_knn_points.shape[0], src_knn_points.shape[1]), dtype=torch.bool).cuda()
 
-    node_mask_mat = torch.logical_and(ref_masks.unsqueeze(1), src_masks.unsqueeze(0))  # (M, N)
+    # 打印形状以检查是否匹配
+    # print(f"[DEBUG] ref_masks shape: {ref_masks.shape}")
+    # print(f"[DEBUG] src_masks shape: {src_masks.shape}")
+    # node_mask_mat = torch.logical_and(ref_masks.unsqueeze(1), src_masks.unsqueeze(0))  # (M, N)
+    node_mask_mat = torch.logical_and(
+        ref_masks.unsqueeze(1).expand(-1, src_masks.shape[0]),
+        src_masks.unsqueeze(0).expand(ref_masks.shape[0], -1)
+    )
+    # print(f"[DEBUG] node_mask_mat shape: {node_mask_mat.shape}")
 
     # filter out non-overlapping patches using enclosing sphere
     ref_knn_dists = torch.linalg.norm(ref_knn_points - ref_nodes.unsqueeze(1), dim=-1)  # (M, K)
@@ -294,7 +302,12 @@ def get_node_correspondences(
     ref_knn_points = ref_knn_points[sel_ref_indices]  # (B, K, 3)
     src_knn_points = src_knn_points[sel_src_indices]  # (B, K, 3)
 
-    point_mask_mat = torch.logical_and(ref_knn_masks.unsqueeze(2), src_knn_masks.unsqueeze(1))  # (B, K, K)
+    # point_mask_mat = torch.logical_and(ref_knn_masks.unsqueeze(2), src_knn_masks.unsqueeze(1))  # (B, K, K)
+    point_mask_mat = torch.logical_and(
+        ref_knn_masks.unsqueeze(2).expand(-1, -1, src_knn_masks.shape[1]),
+        src_knn_masks.unsqueeze(1).expand(-1, ref_knn_masks.shape[1], -1)
+    )
+    # print(f"[DEBUG] point_mask_mat shape: {point_mask_mat.shape}")
 
     # compute overlaps
     dist_mat = pairwise_distance(ref_knn_points, src_knn_points)  # (B, K, K)
